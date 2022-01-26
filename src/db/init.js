@@ -1,9 +1,8 @@
-import pkg from 'mongoose';
+import pkg from "mongoose";
 const { connect } = pkg;
 
 const connectToDb = (url) => {
-    connect(url)
+  connect(url);
 };
 
 export default connectToDb;
-
