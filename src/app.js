@@ -1,5 +1,5 @@
-import pkg from '@slack/bolt';
-import connectToDb from './db/init.js';
+import pkg from "@slack/bolt";
+import connectToDb from "./db/init.js";
 import "dotenv/config";
 import checkInHanlder from "./handlers/checkIn.js";
 import { teamUp, createTeamCallBack } from "./handlers/teamUpCommand.js";
@@ -17,7 +17,7 @@ const app = new App({
 app.message("dalaal checkin", checkInHanlder);
 
 // Team Creation
-app.command("/makeateam", teamUp)
+app.command("/makeateam", teamUp);
 app.view("create_team", createTeamCallBack);
 
 (async () => {
