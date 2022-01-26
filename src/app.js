@@ -6,8 +6,9 @@ import "dotenv/config";
 import connectToDb from "./db/init.js";
 import checkInHanlder from "./handlers/checkIn.js";
 import {
-  createMeeting,
   createMeetingCallBack,
+  initMeeting,
+  initMeetingCallBack,
 } from "./handlers/createMeetingCommand.js";
 import { teamUp, createTeamCallBack } from "./handlers/teamUpCommand.js";
 
@@ -27,8 +28,10 @@ app.message("dalaal checkin", checkInHanlder);
 app.command("/makeateam", teamUp);
 app.view("create_team", createTeamCallBack);
 
-app.command("/meeting", createMeeting);
-app.view("meeting_details", createMeetingCallBack);
+// create meeting
+app.command("/meeting", initMeeting);
+app.view("meeting_details", initMeetingCallBack);
+app.view("create_meeting", createMeetingCallBack);
 
 (async () => {
   await app.start();

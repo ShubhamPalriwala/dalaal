@@ -3,7 +3,7 @@ const createMeetingView = (trigger_id) => {
     trigger_id,
     view: {
       type: "modal",
-      callback_id: "meeting_details",
+      callback_id: "create_meeting",
       title: {
         type: "plain_text",
         text: "My App",
@@ -24,23 +24,52 @@ const createMeetingView = (trigger_id) => {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: "Hello! I will help you host the meeting!",
+            text: "Step 2: Select timings",
           },
         },
         {
           type: "divider",
         },
         {
-          type: "input",
-          block_id: "b_init_meeting",
-          element: {
-            type: "plain_text_input",
-            action_id: "i_meeting_duration",
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: "Select the preferable timeslot for the meeting",
           },
-          label: {
-            type: "plain_text",
-            text: "How long will the meeting be?",
-            emoji: true,
+          accessory: {
+            type: "multi_static_select",
+            placeholder: {
+              type: "plain_text",
+              text: "Select options",
+              emoji: true,
+            },
+            options: [
+              {
+                text: {
+                  type: "plain_text",
+                  text: "*this is plain_text text*",
+                  emoji: true,
+                },
+                value: "value-0",
+              },
+              {
+                text: {
+                  type: "plain_text",
+                  text: "*this is plain_text text*",
+                  emoji: true,
+                },
+                value: "value-1",
+              },
+              {
+                text: {
+                  type: "plain_text",
+                  text: "*this is plain_text text*",
+                  emoji: true,
+                },
+                value: "value-2",
+              },
+            ],
+            action_id: "multi_static_select-action",
           },
         },
       ],
