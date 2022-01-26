@@ -2,10 +2,11 @@
   "name": "dalaal",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
+  "type":"module",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,7 +22,8 @@
   "homepage": "https://github.com/ShubhamPalriwala/dalaal#readme",
   "dependencies": {
     "@slack/bolt": "^3.9.0",
-    "dotenv": "^14.3.2"
+    "dotenv": "^14.3.2",
+    "mongoose": "^6.1.8"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
