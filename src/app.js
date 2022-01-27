@@ -3,6 +3,10 @@ import connectToDb from "./db/init.js";
 import "dotenv/config";
 import checkInHanlder from "./handlers/checkIn.js";
 import { teamUp, createTeamCallBack } from "./handlers/teamUpCommand.js";
+import {
+  googleAuthHandler,
+  meetingEventHandler,
+} from "./handlers/googleCalendar.js";
 
 connectToDb(process.env.MONGODB_URL);
 const { App } = pkg;
@@ -19,6 +23,11 @@ app.message("dalaal checkin", checkInHanlder);
 // Team Creation
 app.command("/makeateam", teamUp);
 app.view("create_team", createTeamCallBack);
+// Google Oauth2
+app.command("/authenticate", googleAuthHandler);
+// Google Calendar scheduling
+app.command("/schedule", meetingEventHandler);
+
 
 (async () => {
   await app.start();
