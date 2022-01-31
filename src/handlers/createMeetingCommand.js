@@ -20,23 +20,43 @@ const initMeetingCallBack = async ({ ack, body, view, client, logger }) => {
 
   duration = parseInt(duration);
 
-  console.log(duration);
+  // console.log("duration:>>", duration);
 
   const slots = [];
 
-  // TODO: make slots array
-  // divide 24 hours into slots according to duration
-  for (let i = 0; i < 24 * 60; i += duration) {
+  // TODO: fix slots for more than 1 hr, it schedules
+  // in multiples of duration
+  for (let i = 0; i < 24; i += duration) {
+    let start = i.toString();
+    let end = (i + duration).toString();
+
+    if (end > 24) {
+      end = 24;
+    }
+
+    if (start.length == 1) {
+      // console.log(start);
+      start = "0" + start;
+    }
+    if (end.length == 1) {
+      // console.log(end);
+      end = "0" + end;
+    }
+
+    start = start + "00";
+    end = end + "00";
+
     slots.push({
-      start: i,
-      end: (i + duration) / 60,
+      start,
+      end,
     });
   }
 
-  console.log(slots);
+  // console.log(slots);
   try {
-    // pass teams made and slots to select from
-    const result = await client.views.open(createMeetingView(body.trigger_id));
+    const result = await client.views.open(
+      createMeetingView(body.trigger_id, slots)
+    );
     logger.info(result);
   } catch (error) {
     logger.error(error);
@@ -45,19 +65,26 @@ const initMeetingCallBack = async ({ ack, body, view, client, logger }) => {
 
 const createMeetingCallBack = async ({ ack, body, view, client, logger }) => {
   await ack();
-  // let duration =
-  //   view["state"]["values"]["b_init_meeting"]["i_meeting_duration"].value;
+  let selectedSlotOptions =
+    view["state"]["values"]["b_meeting_slots"]["i_selected_slots"]
+      .selected_options;
   let selectedSlots = [];
-  let meetingTitle = "";
-  let meetingDescription = "";
+  let meetingTitle =
+    view["state"]["values"]["b_meeting_title"]["i_meeting_title"].value;
+  let meetingDescription =
+    view["state"]["values"]["b_meeting_desc"]["i_meeting_desc"].value;
+  // TODO: add workspace body
   let workspace = "";
-  let teamId = "";
+  let teamId =
+    view["state"]["values"]["b_meeting_team"]["i_meeting_team"].value;
   const user_who_created = body["user"]["id"];
 
-  console.log(selectedSlots);
+  selectedSlotOptions.forEach((option) => {
+    selectedSlots.push(JSON.parse(option.value));
+  });
 
-  const result = await client.views.open(createMeetingView(body.trigger_id));
-  logger.info(result);
+  // console.log("selected:>> ", selectedSlots);
+
   try {
     await teams.create({
       workspace,
@@ -67,12 +94,14 @@ const createMeetingCallBack = async ({ ack, body, view, client, logger }) => {
       host: user_who_created,
       teamId,
     });
+
     await client.chat.postMessage({
       channel: user_who_created,
       text: `Meeting has been succesfully created!`,
     });
   } catch (error) {
-    console.log(error);
+    console.log("createMeetingCallBack:>> ", error);
   }
 };
+
 export { initMeeting, initMeetingCallBack, createMeetingCallBack };

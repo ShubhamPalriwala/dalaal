@@ -12,6 +12,7 @@ var meetings = model(
     host: { type: String, required: true },
     // TODO: change to reference of id
     teamId: { type: String, required: true },
+    invitees: { type: Array, required: false },
   })
 );
 

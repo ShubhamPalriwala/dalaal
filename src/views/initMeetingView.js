@@ -39,7 +39,7 @@ const initMeetingView = (trigger_id) => {
           },
           label: {
             type: "plain_text",
-            text: "How long will the meeting be (in minutes)?",
+            text: "How long will the meeting be (in hours)?",
             emoji: true,
           },
         },
