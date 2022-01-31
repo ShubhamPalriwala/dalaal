@@ -4,8 +4,7 @@ import teams from "../db/models/teamModel.js";
 const teamUp = async ({ ack, body, client, logger }) => {
   await ack();
   try {
-    const result = await client.views.open(teamUpView(body.trigger_id));
-    logger.info(result);
+    await client.views.open(teamUpView(body.trigger_id));
   } catch (error) {
     logger.error(error);
   }
@@ -16,16 +15,28 @@ const createTeamCallBack = async ({ ack, body, view, client, logger }) => {
   const name = view["state"]["values"]["b_team_name"]["i_team_name"].value;
   const users = view["state"]["values"]["b_users"]["i_users"]["selected_users"];
 
-  const user_who_created = body["user"]["id"];
+  const userWhoCreated = body["user"]["id"];
+  const teamName = body["team"]["domain"];
 
   try {
-    await teams.create({ teamname: name, users });
+    await teams.create({ orgName: teamName, teamname: name, users });
     await client.chat.postMessage({
-      channel: user_who_created,
+      channel: userWhoCreated,
       text: "Team " + name + " has been succesfully created!",
     });
   } catch (error) {
-    console.log(error);
+    let errMessage =
+      "Something went wrong for the team:" + name + ". Please try again.";
+
+    if (error.name === "MongoServerError" && error.code === 11000) {
+      errMessage =
+        "A Team with the name " + name + " already exists in your workplace.";
+    }
+    await client.chat.postMessage({
+      channel: userWhoCreated,
+      text: errMessage,
+    });
+    logger(error);
   }
 };
 

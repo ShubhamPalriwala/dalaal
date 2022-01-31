@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
@@ -23,6 +23,7 @@
   "dependencies": {
     "@slack/bolt": "^3.9.0",
     "dotenv": "^14.3.2",
+    "googleapis": "^92.0.0",
     "mongoose": "^6.1.8"
   },
   "devDependencies": {
