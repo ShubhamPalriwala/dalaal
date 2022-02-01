@@ -7,6 +7,11 @@ import {
   googleAuthHandler,
   meetingEventHandler,
 } from "./handlers/googleCalendar.js";
+import {
+  createMeetingCallBack,
+  initMeeting,
+  initMeetingCallBack,
+} from "./handlers/createMeetingCommand.js";
 
 connectToDb(process.env.MONGODB_URL);
 const { App } = pkg;
@@ -23,11 +28,15 @@ app.message("dalaal checkin", checkInHanlder);
 // Team Creation
 app.command("/makeateam", teamUp);
 app.view("create_team", createTeamCallBack);
+
+// create meeting
+app.command("/meeting", initMeeting);
+app.view("meeting_details", initMeetingCallBack);
+app.view("create_meeting", createMeetingCallBack);
 // Google Oauth2
 app.command("/authenticate", googleAuthHandler);
 // Google Calendar scheduling
 app.command("/schedule", meetingEventHandler);
-
 
 (async () => {
   await app.start();
