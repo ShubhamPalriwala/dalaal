@@ -2,18 +2,22 @@ import pkg from "mongoose";
 const { model, Schema, Types } = pkg;
 
 var meetings = model(
-    "meetings",
-    new Schema({
-        workspace: { type: String, required: true },
-        title: { type: String, required: true },
-        description: [{ type: String, required: false }],
-        preferableSlots: { type: Array, required: true },
-        timing: { type: Object, required: false },
-        host: { type: String, required: true },
-        teamId: { type: Types.ObjectId, ref: "teams", required: false },
-        invitees: { type: Array, required: false },
-        countOfAttendees: { type: Number, required: true, default: 0 },
-    })
+  "meetings",
+  new Schema({
+    workspace: { type: String, required: true },
+    title: { type: String, required: true },
+    description: [{ type: String, required: false }],
+    preferableSlots: { type: Array, required: true },
+    timing: { type: Object, required: false },
+    host: { type: String, required: true },
+    teamId: {
+      type: Types.ObjectId,
+      ref: "teams",
+      // required: true
+    },
+    invitees: { type: Array, required: false },
+    countOfAttendees: { type: Number, required: true, default: 0 },
+  })
 );
 
 export default meetings;

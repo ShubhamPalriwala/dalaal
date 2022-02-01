@@ -11,6 +11,7 @@ import {
   createMeetingCallBack,
   initMeeting,
   initMeetingCallBack,
+  requestMeetingCallback,
 } from "./handlers/createMeetingCommand.js";
 
 connectToDb(process.env.MONGODB_URL);
@@ -30,13 +31,15 @@ app.command("/makeateam", teamUp);
 app.view("create_team", createTeamCallBack);
 
 // create meeting
-app.command("/meeting", initMeeting);
+app.command("/mc", initMeeting);
 app.view("meeting_details", initMeetingCallBack);
 app.view("create_meeting", createMeetingCallBack);
+app.action("request_meeting", requestMeetingCallback);
+
 // Google Oauth2
-app.command("/authenticate", googleAuthHandler);
+app.command("/au", googleAuthHandler);
 // Google Calendar scheduling
-app.command("/schedule", meetingEventHandler);
+app.command("/sc", meetingEventHandler);
 
 (async () => {
   await app.start();
