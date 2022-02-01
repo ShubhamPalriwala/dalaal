@@ -1,9 +1,9 @@
 import meetings from "../db/models/meetingModel.js";
-import teams from "../db/models/teamModel.js";
 import createMeetingView from "../views/createMeetingView.js";
 import initMeetingView from "../views/initMeetingView.js";
 import users from "../db/models/userModel.js";
-import { ggwp } from "./googleCalendar.js";
+import { givePreferredSlot } from "./givePreferredSlot.js";
+import { emailCollector } from "./googleCalendar.js";
 
 const initMeeting = async ({ ack, body, client, logger }) => {
   await ack();
@@ -105,7 +105,7 @@ const createMeetingCallBack = async ({ ack, body, view, client, logger }) => {
     var filteredAttendees = meetingAttendees.filter(function (value) {
       return value != userWhoCreated;
     });
-    await ggwp(filteredAttendees, client);
+    await emailCollector(filteredAttendees, client);
     const meetingfromdb = await meetings.create({
       workspace,
       title: meetingTitle,
@@ -113,10 +113,8 @@ const createMeetingCallBack = async ({ ack, body, view, client, logger }) => {
       preferableSlots: selectedSlots,
       host: userWhoCreated,
       invitees: filteredAttendees,
-      // teamId,
     });
 
-    console.log(filteredAttendees);
     const options = [];
 
     selectedSlots.forEach((slot) => {
@@ -195,8 +193,7 @@ const requestMeetingCallback = async ({ ack, body, view, client, logger }) => {
   const meetingId = body.message.text;
 
   try {
-    console.log(meetingId);
-    console.log("ye :>>", preferedSlot);
+    await givePreferredSlot(preferedSlot, body.user.id, meetingId, client);
   } catch (error) {
     logger.error(error);
   }

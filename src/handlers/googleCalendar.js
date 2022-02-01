@@ -27,7 +27,6 @@ class googleCalendarOauth {
       this.oauthClient.getToken(code, (err, token) => {
         if (err) return reject(err);
         this.oauthClient.setCredentials(token);
-        console.log(token);
         resolve(token);
       });
     });
@@ -55,9 +54,7 @@ const googleAuthHandler = async ({ ack, body, logger, client }) => {
         await client.chat.postEphemeral({
           channel: body.channel_id,
           user: body.user_id,
-          text:
-            "Please go to the follwing url and authenticate yourself: \n\n" +
-            url,
+          text: `Please go to the follwing url and authenticate yourself below \n\n <${url}|*Click here to authenticate yourself!*>`,
         });
       } else {
         const code = body.text;
@@ -125,113 +122,115 @@ const emailCollector = async (userIds, client) => {
   }
 };
 
-const ggwp = async (userIds, client) => {
-  await emailCollector(userIds, client);
-};
-
-const meetingEventHandler = async ({ ack, body, logger, client, say }) => {
-  logger.info(body);
-  await ack();
-  try {
-    const user = await users.findOne({ user_id: body.user_id });
-    //Guard Statements
-    if (!user) {
-      await client.chat.postEphemeral({
-        channel: body.channel_id,
-        user: body.user_id,
-        text: "Please authenticate yourself first using /authenticate command!",
-      });
-      return;
+const userDataGather = async (attendees) => {
+  const final_emails = [];
+  for (const attendee of attendees) {
+    const res = await users.findOne({ user_id: attendee });
+    if (!res) {
+      console.log("attendee not found!");
     }
-    if (user.isAuthenticated) {
-      await client.chat.postEphemeral({
-        channel: body.channel_id,
-        user: body.user_id,
-        text: "Please authenticate yourself first using /authenticate command!",
-      });
-      return;
-    }
-
-    //Creation of Google Calendar
-    const auth = new googleCalendarOauth();
-    const credentials = {
-      access_token: user.access_token,
-      refresh_token: user.refresh_token,
-      scope: user.scope,
-      token_type: user.token_type,
-      expiry_date: user.expiry_date,
-    };
-    auth.setOuathCredentials(credentials);
-    const calendar = google.calendar({ version: "v3", auth: credentials });
-    const data = body.text.split(",");
-    const startDate = new Date(parseInt(data[0]));
-    const endDate = new Date(parseInt(data[1]));
-    const summary = data[2];
-    const description = data[3];
-    const emails = data[4].split(" ");
-    const attendees = emails.map((email) => {
-      return { email: email };
-    });
-    console.log({
-      startDate,
-      endDate,
-      description,
-      summary,
-      emails,
-      attendees,
-    });
-    const event = {
-      summary: summary,
-      location: "",
-      description: description,
-      start: {
-        dateTime: startDate,
-        timeZone: "Asia/Kolkata",
-      },
-      end: {
-        dateTime: endDate,
-        timeZone: "Asia/Kolkata",
-      },
-      conferenceData: {
-        createRequest: {
-          conferenceSolutionKey: {
-            type: "hangoutsMeet",
-          },
-          requestId:
-            "some-random-string" + Math.floor(Math.random() * 900000 + 1),
-        },
-      },
-      attendees: attendees,
-      reminders: {
-        useDefault: false,
-        overrides: [
-          { method: "email", minutes: 24 * 60 },
-          { method: "popup", minutes: 10 },
-        ],
-      },
-    };
-    calendar.events.insert(
-      {
-        auth: auth.oauthClient,
-        calendarId: "primary",
-        resource: event,
-        sendUpdates: "all",
-        sendNotifications: true,
-        conferenceDataVersion: 1,
-      },
-      (err, event) => {
-        if (err) {
-          logger.error(err);
-          return;
-        }
-      }
-    );
-    await say(
-      `Your meeting has been scheduled successfully! \n\nTime: ${startDate} - ${endDate} \n\nSummary: ${summary} \nDescription: ${description} \nAttendees: ${emails}`
-    );
-  } catch (error) {
-    logger.error(error);
+    final_emails.push(res.email);
   }
+  return final_emails;
 };
 
-export { googleAuthHandler, meetingEventHandler, ggwp };
+const triggerMeeting = async (startTime, endTime, updatedMeeting, client) => {
+  const userWhoScheduled = await users.findOne({
+    user_id: updatedMeeting.host,
+  });
+  if (!userWhoScheduled) {
+    console.log("scheduler not found!");
+    return;
+  }
+  const emails = await userDataGather(updatedMeeting.invitees);
+  const attendees = emails.map((email) => {
+    return { email: email };
+  });
+
+  //Creation of Google Calendar Event
+  const auth = new googleCalendarOauth();
+  const credentials = {
+    access_token: userWhoScheduled.access_token,
+    refresh_token: userWhoScheduled.refresh_token,
+    scope: userWhoScheduled.scope,
+    token_type: userWhoScheduled.token_type,
+    expiry_date: userWhoScheduled.expiry_date,
+  };
+  auth.setOuathCredentials(credentials);
+  const calendar = google.calendar({ version: "v3", auth: credentials });
+  console.log("Event created!", {
+    startTime,
+    endTime,
+    updatedMeeting,
+    attendees,
+  });
+  const event = {
+    summary: updatedMeeting.title,
+    location: "",
+    description: updatedMeeting.description[0],
+    start: {
+      dateTime: startTime,
+      timeZone: "Asia/Kolkata",
+    },
+    end: {
+      dateTime: endTime,
+      timeZone: "Asia/Kolkata",
+    },
+    conferenceData: {
+      createRequest: {
+        conferenceSolutionKey: {
+          type: "hangoutsMeet",
+        },
+        requestId:
+          "some-random-string" + Math.floor(Math.random() * 900000 + 1),
+      },
+    },
+    attendees: attendees,
+    reminders: {
+      useDefault: false,
+      overrides: [
+        { method: "email", minutes: 24 * 60 },
+        { method: "popup", minutes: 10 },
+      ],
+    },
+  };
+  calendar.events.insert(
+    {
+      auth: auth.oauthClient,
+      calendarId: "primary",
+      resource: event,
+      sendUpdates: "all",
+      sendNotifications: true,
+      conferenceDataVersion: 1,
+    },
+    async (err, event) => {
+      if (err) {
+        console.log(err);
+        console.log(err.data.error);
+        return;
+      }
+      await client.chat.postMessage({
+        channel: updatedMeeting.host,
+        text: `Hey ${
+          userWhoScheduled.name
+        }!, your meeting has been scheduled! at <!date^${Math.floor(
+          startTime.getTime() / 1000
+        )}^{date} at {time}| > to <!date^${Math.floor(
+          endTime.getTime() / 1000
+        )}^{date} at {time}| >`,
+      });
+      for (const invitee of updatedMeeting.invitees) {
+        await client.chat.postMessage({
+          channel: invitee,
+          text: `Hey there!, your meeting has been scheduled at <!date^${Math.floor(
+            startTime.getTime() / 1000
+          )}^{date} at {time}| > to <!date^${Math.floor(
+            endTime.getTime() / 1000
+          )}^{date} at {time}| > ! Please check your e-mail to learn more`,
+        });
+      }
+    }
+  );
+};
+
+export { googleAuthHandler, emailCollector, triggerMeeting };

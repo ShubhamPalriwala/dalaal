@@ -3,10 +3,7 @@ import connectToDb from "./db/init.js";
 import "dotenv/config";
 import checkInHanlder from "./handlers/checkIn.js";
 import { teamUp, createTeamCallBack } from "./handlers/teamUpCommand.js";
-import {
-  googleAuthHandler,
-  meetingEventHandler,
-} from "./handlers/googleCalendar.js";
+import { googleAuthHandler } from "./handlers/googleCalendar.js";
 import {
   createMeetingCallBack,
   initMeeting,
@@ -26,23 +23,20 @@ const app = new App({
 
 app.message("dalaal", checkInHanlder);
 
-// Team Creation
-app.command("/makeateam", teamUp);
+// Teams
+app.command("/create_team", teamUp);
 app.view("create_team", createTeamCallBack);
 
-// create meeting
-app.command("/mc", initMeeting);
+// Meetings
+app.command("/meeting", initMeeting);
 app.view("meeting_details", initMeetingCallBack);
 app.view("create_meeting", createMeetingCallBack);
 app.action("request_meeting", requestMeetingCallback);
 
 // Google Oauth2
-app.command("/au", googleAuthHandler);
-// Google Calendar scheduling
-app.command("/sc", meetingEventHandler);
+app.command("/authenticate", googleAuthHandler);
 
 (async () => {
   await app.start();
-
-  console.log("⚡️ Bolt app is running!");
+  console.log("⚡️ Dalaal app is running!");
 })();
