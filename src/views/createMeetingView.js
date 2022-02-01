@@ -100,6 +100,24 @@ const createMeetingView = (trigger_id, slots) => {
             emoji: true,
           },
         },
+        {
+          type: "input",
+          block_id: "b_meeting_attendees",
+          element: {
+            type: "multi_users_select",
+            placeholder: {
+              type: "plain_text",
+              text: "Select attendees",
+              emoji: true,
+            },
+            action_id: "i_meeting_attendees",
+          },
+          label: {
+            type: "plain_text",
+            text: "Select meeting attendees",
+            emoji: true,
+          },
+        },
       ],
     },
   };

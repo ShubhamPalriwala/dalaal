@@ -68,6 +68,9 @@ const createMeetingCallBack = async ({ ack, body, view, client, logger }) => {
     view["state"]["values"]["b_meeting_title"]["i_meeting_title"].value;
   let meetingDescription =
     view["state"]["values"]["b_meeting_desc"]["i_meeting_desc"].value;
+  let meetingAttendees =
+    view["state"]["values"]["b_meeting_attendees"]["i_meeting_attendees"]
+      .selected_users;
   // TODO: add workspace body
   let workspace = "sample";
   let teamId =
@@ -77,6 +80,8 @@ const createMeetingCallBack = async ({ ack, body, view, client, logger }) => {
   selectedSlotOptions.forEach((option) => {
     selectedSlots.push(JSON.parse(option.value));
   });
+
+  console.log(meetingAttendees);
 
   try {
     await meetings.create({
