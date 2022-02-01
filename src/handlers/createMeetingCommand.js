@@ -2,12 +2,32 @@ import meetings from "../db/models/meetingModel.js";
 import teams from "../db/models/teamModel.js";
 import createMeetingView from "../views/createMeetingView.js";
 import initMeetingView from "../views/initMeetingView.js";
+import users from "../db/models/userModel.js";
+import { ggwp } from "./googleCalendar.js";
 
 const initMeeting = async ({ ack, body, client, logger }) => {
   await ack();
   try {
-    const result = await client.views.open(initMeetingView(body.trigger_id));
-    logger.info(result);
+    const userData_who_created = await users.findOne({
+      user_id: body.user_id,
+    });
+    if (!userData_who_created) {
+      await client.chat.postEphemeral({
+        channel: body.channel_id,
+        user: body.user_id,
+        text: "Please authenticate yourself using the /authenticate command to schedule a meeting!",
+      });
+      return;
+    }
+    if (!userData_who_created.isAuthenticated) {
+      await client.chat.postEphemeral({
+        channel: body.channel_id,
+        user: body.user_id,
+        text: "Please authenticate yourself using the /authenticate command to schedule a meeting!",
+      });
+      return;
+    }
+    await client.views.open(initMeetingView(body.trigger_id));
   } catch (error) {
     logger.error(error);
   }
@@ -75,26 +95,29 @@ const createMeetingCallBack = async ({ ack, body, view, client, logger }) => {
   let workspace = "sample";
   let teamId =
     view["state"]["values"]["b_meeting_team"]["i_meeting_team"].value;
-  const user_who_created = body["user"]["id"];
+  const userWhoCreated = body["user"]["id"];
 
   selectedSlotOptions.forEach((option) => {
     selectedSlots.push(JSON.parse(option.value));
   });
 
-  console.log(meetingAttendees);
-
   try {
+    var filteredAttendees = meetingAttendees.filter(function (value) {
+      return value != userWhoCreated;
+    });
+    await ggwp(filteredAttendees, client);
     await meetings.create({
       workspace,
       title: meetingTitle,
       description: meetingDescription,
       preferableSlots: selectedSlots,
-      host: user_who_created,
+      host: userWhoCreated,
+      invitees: filteredAttendees,
       teamId,
     });
 
     await client.chat.postMessage({
-      channel: user_who_created,
+      channel: userWhoCreated,
       text: `Meeting has been succesfully created!`,
     });
   } catch (error) {
