@@ -1,6 +1,5 @@
 const createMeetingView = (trigger_id, slots) => {
   let options = [];
-  console.log(slots);
   slots.forEach((slot) => {
     let obj = {
       text: {

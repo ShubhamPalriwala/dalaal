@@ -1,3 +1,5 @@
+import meetings from "../db/models/meetingModel.js";
+import teams from "../db/models/teamModel.js";
 import createMeetingView from "../views/createMeetingView.js";
 import initMeetingView from "../views/initMeetingView.js";
 
@@ -20,13 +22,9 @@ const initMeetingCallBack = async ({ ack, body, view, client, logger }) => {
 
   duration = parseInt(duration);
 
-  // console.log("duration:>>", duration);
-
   const slots = [];
 
-  // TODO: fix slots for more than 1 hr, it schedules
-  // in multiples of duration
-  for (let i = 0; i < 24; i += duration) {
+  for (let i = 0; i < 24; i += 1) {
     let start = i.toString();
     let end = (i + duration).toString();
 
@@ -35,11 +33,9 @@ const initMeetingCallBack = async ({ ack, body, view, client, logger }) => {
     }
 
     if (start.length == 1) {
-      // console.log(start);
       start = "0" + start;
     }
     if (end.length == 1) {
-      // console.log(end);
       end = "0" + end;
     }
 
@@ -52,12 +48,11 @@ const initMeetingCallBack = async ({ ack, body, view, client, logger }) => {
     });
   }
 
-  // console.log(slots);
   try {
     const result = await client.views.open(
       createMeetingView(body.trigger_id, slots)
     );
-    logger.info(result);
+    // logger.info(result);
   } catch (error) {
     logger.error(error);
   }
@@ -74,7 +69,7 @@ const createMeetingCallBack = async ({ ack, body, view, client, logger }) => {
   let meetingDescription =
     view["state"]["values"]["b_meeting_desc"]["i_meeting_desc"].value;
   // TODO: add workspace body
-  let workspace = "";
+  let workspace = "sample";
   let teamId =
     view["state"]["values"]["b_meeting_team"]["i_meeting_team"].value;
   const user_who_created = body["user"]["id"];
@@ -83,10 +78,8 @@ const createMeetingCallBack = async ({ ack, body, view, client, logger }) => {
     selectedSlots.push(JSON.parse(option.value));
   });
 
-  // console.log("selected:>> ", selectedSlots);
-
   try {
-    await teams.create({
+    await meetings.create({
       workspace,
       title: meetingTitle,
       description: meetingDescription,

@@ -7,6 +7,11 @@ import {
   googleAuthHandler,
   meetingEventHandler,
 } from "./handlers/googleCalendar.js";
+import {
+  createMeetingCallBack,
+  initMeeting,
+  initMeetingCallBack,
+} from "./handlers/createMeetingCommand.js";
 
 connectToDb(process.env.MONGODB_URL);
 const { App } = pkg;
@@ -32,7 +37,6 @@ app.view("create_meeting", createMeetingCallBack);
 app.command("/authenticate", googleAuthHandler);
 // Google Calendar scheduling
 app.command("/schedule", meetingEventHandler);
-
 
 (async () => {
   await app.start();
