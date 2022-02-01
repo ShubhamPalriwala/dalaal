@@ -1,25 +1,13 @@
-const adminSlots = [
-    { start: 1000, end: 1200 },
-    { start: 2100, end: 2300 },
-];
-const slots = [
-    { start: 1000, end: 1100 },
-    { start: 800, end: 1300 },
-    { start: 1000, end: 1130 },
-];
-const duration = 60;
-
 const findFreeTime = (adminSlots, slots, duration) => {
-    let feasibleSlots = [[]];
-
+    let feasibleSlots = [];
     for (
         let adminPreferredSlot = 0;
         adminPreferredSlot < adminSlots.length;
         adminPreferredSlot++
     ) {
         const current = adminSlots[adminPreferredSlot];
-        let startTime = current.start;
-        let endTime = current.end;
+        let startTime = parseInt(current.start);
+        let endTime = parseInt(current.end);
 
         for (let i = 0; i < slots.length; i++) {
             if (startTime < slots[i].start) {
@@ -29,17 +17,13 @@ const findFreeTime = (adminSlots, slots, duration) => {
                 endTime = slots[i].end;
             }
         }
-        if (startTime > endTime) {
-            feasibleSlots[adminPreferredSlot] = [];
-            break;
-        }
-
         while (startTime < endTime) {
             if (addTime(startTime, duration) <= endTime) {
-                feasibleSlots[adminPreferredSlot].push({
+                const temp = {
                     start: startTime,
                     end: addTime(startTime, duration),
-                });
+                };
+                feasibleSlots.push(temp);
 
                 startTime = addTime(startTime, duration);
             } else {
@@ -50,8 +34,6 @@ const findFreeTime = (adminSlots, slots, duration) => {
     return feasibleSlots;
 };
 
-// Output Time: [ [ { start: 1000, end: 1100 } ], [] ]
-
 const addTime = (time, duration) => {
     let newTime = time + duration;
     if (newTime % 100 >= 60) {
@@ -61,4 +43,4 @@ const addTime = (time, duration) => {
     return newTime;
 };
 
-console.log(findFreeTime(adminSlots, slots, duration));
+module.exports = findFreeTime;

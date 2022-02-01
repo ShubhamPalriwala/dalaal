@@ -1,8 +1,12 @@
+import { givePreferredSlot } from "./givePreferredSlot.js";
+
 const checkIn = async ({ message, say, client }) => {
-  console.log(message.user);
-  const res = await client.users.profile.get({ user: message.user })
-  console.log(res);
-  await say(`Yes! I'm here <@${message.user}>!`);
+    // await givePreferredSlot(
+    //     { start: "1100", end: "2100" },
+    //     "U02ULGJKWJ2",
+    //     "61f97ae037ccf0cad58cea1a"
+    // );
+    await say(`Yes! I'm here <@${message.user}>!`);
 };
 
 export default checkIn;

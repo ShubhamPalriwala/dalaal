@@ -10,7 +10,7 @@ var meetings = model(
         preferableSlots: { type: Array, required: true },
         timing: { type: Object, required: false },
         host: { type: String, required: true },
-        teamId: { type: Types.ObjectId, ref: "teams", required: true },
+        teamId: { type: Types.ObjectId, ref: "teams", required: false },
         invitees: { type: Array, required: false },
         countOfAttendees: { type: Number, required: true, default: 0 },
     })
