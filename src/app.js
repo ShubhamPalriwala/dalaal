@@ -23,7 +23,7 @@ const app = new App({
   port: process.env.PORT || 3000,
 });
 
-app.message("hi", checkInHanlder);
+app.message("dalaal", checkInHanlder);
 
 // Team Creation
 app.command("/makeateam", teamUp);
