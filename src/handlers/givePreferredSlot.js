@@ -56,6 +56,15 @@ const givePreferredSlot = async (slot, userId, meetingId, client) => {
       const endDate = new Date();
       endDate.setHours(finalisedSlot.end / 100, 0, 0);
       await triggerMeeting(startDate, endDate, updatedMeeting, client);
+      await meetings.findOneAndUpdate(
+        {
+          _id: meetingId,
+        },
+        {
+          start: Math.floor(startDate.getTime() / 1000),
+          end: Math.floor(endDate.getTime() / 1000),
+        }
+      );
     }
     return freeSlots;
   } catch (error) {
