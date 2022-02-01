@@ -8,8 +8,10 @@ const userSchema = new Schema({
   token_type: { type: String, required: true },
   expiry_date: { type: Number, required: true },
   user_id: { type: String, required: true },
+  name: { type: String, required: true },
   email: { type: String, required: true },
   name: { type: String, required: true },
+  isAuthenticated: { type: String, required: true },
 });
 
 userSchema.index({ user_id: 1, email: 1 }, { unique: true });

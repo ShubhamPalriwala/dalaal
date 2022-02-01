@@ -75,6 +75,7 @@ const googleAuthHandler = async ({ ack, body, logger, client }) => {
               user_id: body.user_id,
               email: res.profile.email,
               name: res.profile.real_name_normalized,
+              isAuthenticated: true,
             },
             { upsert: true }
           );
@@ -105,18 +106,53 @@ const googleAuthHandler = async ({ ack, body, logger, client }) => {
   }
 };
 
+const emailCollector = async (userIds, client) => {
+  for (const user of userIds) {
+    const userData = await users.findOne({ user_id: user });
+    if (!userData) {
+      const res = await client.users.profile.get({ user });
+      await users.updateOne(
+        { email: res.profile.email },
+        {
+          user_id: user,
+          email: res.profile.email,
+          name: res.profile.real_name_normalized,
+          isAuthenticated: true,
+        },
+        { upsert: true }
+      );
+    }
+  }
+};
+
+const ggwp = async (userIds, client) => {
+  await emailCollector(userIds, client);
+};
+
 const meetingEventHandler = async ({ ack, body, logger, client, say }) => {
   logger.info(body);
   await ack();
   try {
     const user = await users.findOne({ user_id: body.user_id });
+    //Guard Statements
     if (!user) {
       await client.chat.postEphemeral({
         channel: body.channel_id,
         user: body.user_id,
         text: "Please authenticate yourself first using /authenticate command!",
       });
+      return;
     }
+    if (user.isAuthenticated) {
+      await client.chat.postEphemeral({
+        channel: body.channel_id,
+        user: body.user_id,
+        text: "Please authenticate yourself first using /authenticate command!",
+      });
+      return;
+    }
+
+    //Creation of Google Calendar
     const auth = new googleCalendarOauth();
     const credentials = {
       access_token: user.access_token,
@@ -198,4 +234,4 @@ const meetingEventHandler = async ({ ack, body, logger, client, say }) => {
   }
 };
 
-export { googleAuthHandler, meetingEventHandler };
+export { googleAuthHandler, meetingEventHandler, ggwp };
