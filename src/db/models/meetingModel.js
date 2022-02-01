@@ -8,6 +8,8 @@ var meetings = model(
     title: { type: String, required: true },
     description: [{ type: String, required: false }],
     preferableSlots: { type: Array, required: true },
+    start: { type: Number, required: false },
+    end: { type: Number, required: false },
     timing: { type: Object, required: false },
     host: { type: String, required: true },
     teamId: {

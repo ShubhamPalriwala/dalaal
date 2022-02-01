@@ -1,5 +1,5 @@
-const checkIn = async ({ message, say, client }) => {
+const checkInHanlder = async ({ message, say }) => {
   await say(`Hey there! I am alive <@${message.user}>!`);
 };
 
-export default checkIn;
+export default checkInHanlder;

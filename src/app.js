@@ -10,7 +10,7 @@ import {
   initMeetingCallBack,
   requestMeetingCallback,
 } from "./handlers/createMeetingCommand.js";
-
+import showMeetingsHandler from "./handlers/show_meetings.js";
 connectToDb(process.env.MONGODB_URL);
 const { App } = pkg;
 const app = new App({
@@ -29,6 +29,7 @@ app.view("create_team", createTeamCallBack);
 
 // Meetings
 app.command("/meeting", initMeeting);
+app.command("/show_meetings", showMeetingsHandler);
 app.view("meeting_details", initMeetingCallBack);
 app.view("create_meeting", createMeetingCallBack);
 app.action("request_meeting", requestMeetingCallback);
